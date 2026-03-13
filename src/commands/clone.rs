@@ -1,14 +1,12 @@
-use crate::commands::{dated_name, git_run};
 use crate::context::RunContext;
 use anyhow::Result;
 
 pub fn clone(ctx: &RunContext, git_uri: String, name: Option<String>) -> Result<()> {
     let name = name.unwrap_or_else(|| generate_default_name(&git_uri));
-    let dir_name = dated_name(&name);
+    let dir_name = ctx.dated_name(&name);
     let target_path = ctx.prepare_target_path(&dir_name)?;
 
-    git_run(
-        ctx,
+    ctx.git_run(
         &["clone", &git_uri, &target_path.to_string_lossy()],
         &target_path,
         &format!("git clone {git_uri}"),

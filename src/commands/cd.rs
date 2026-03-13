@@ -1,4 +1,4 @@
-use crate::command::looks_like_git_url;
+use crate::commands::looks_like_git_url;
 use crate::context::RunContext;
 use anyhow::Result;
 

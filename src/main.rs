@@ -1,5 +1,4 @@
 mod args;
-mod command;
 mod commands;
 mod context;
 mod tui;

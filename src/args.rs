@@ -1,4 +1,4 @@
-use crate::command::{Command, Runnable, looks_like_git_url};
+use crate::commands::{Command, Runnable, looks_like_git_url};
 use crate::context::RunContext;
 use anyhow::{Context, Result};
 use clap::Parser;

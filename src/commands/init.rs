@@ -12,9 +12,7 @@ pub fn init(ctx: &RunContext, path: Option<PathBuf>) -> Result<()> {
         .map(|n| n.to_string_lossy())
         .unwrap_or_else(|| "bash".into());
 
-    let exe = std::env::current_exe()
-        .map(|p| p.to_string_lossy().into_owned())
-        .unwrap_or_else(|_| "trust".to_string());
+    let exe = ctx.exe_path();
 
     let template = match shell_name.as_ref() {
         "fish" => format!(
