@@ -1,57 +1,68 @@
-use crate::command::Command;
-use anyhow::Result;
+use crate::command::{Command, Runnable, looks_like_git_url};
+use crate::context::RunContext;
+use anyhow::{Context, Result};
 use clap::Parser;
 use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
-#[command(name = "trust", version = env!("CARGO_PKG_VERSION"), about = "Rusty directories for every vibe")]
 #[command(
-    long_about = "Quickly create and jump into fresh folders for your experiments."
+    name = "trust", 
+    version,
+    about = "Ephemeral workspace manager for your experiments",
+    long_about = "Quickly create and jump into fresh folders for your experiments – an ephemeral workspace manager."
 )]
 pub struct Args {
     #[command(subcommand)]
     pub command: Option<Command>,
+
     #[arg(
         long,
         value_name = "PATH",
+        env = "TRUST_PATH",
         help = "Override tries directory (default: ~/src/tries)"
     )]
     pub path: Option<PathBuf>,
+
     #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-    pub query: Vec<String>,
+    pub shorthand: Vec<String>,
 }
 
 impl Args {
-    pub fn parse() -> Result<Self> {
-        match Self::try_parse() {
-            Ok(a) => Ok(a),
-            Err(e) if e.kind() == clap::error::ErrorKind::DisplayHelp => {
-                e.print().ok();
-                std::process::exit(0);
-            }
-            Err(e) if e.kind() == clap::error::ErrorKind::DisplayVersion => {
-                println!("try {}", env!("CARGO_PKG_VERSION"));
-                std::process::exit(0);
-            }
-            Err(e) => Err(e.into()),
-        }
+    pub fn run(self) -> Result<()> {
+        let root = self.root_path()?;
+        let ctx = RunContext { root };
+        self.resolve_command().run(&ctx)
     }
 
     pub fn resolve_command(&self) -> Command {
-        self.command.clone().unwrap_or_else(|| Command::Cd {
-            query: (!self.query.is_empty()).then(|| self.query.join(" ")),
-        })
+        if let Some(cmd) = self.command.clone() {
+            return cmd;
+        }
+
+        let query = if self.shorthand.is_empty() {
+            None
+        } else {
+            Some(self.shorthand.join(" "))
+        };
+
+        if let Some(ref q) = query {
+            if looks_like_git_url(q) {
+                return Command::Clone {
+                    url: q.clone(),
+                    name: None,
+                };
+            }
+        }
+
+        Command::Cd { query }
     }
 
-    pub fn root_path(&self) -> Result<PathBuf> {
+    fn root_path(&self) -> Result<PathBuf> {
         if let Some(p) = &self.path {
             return Ok(p.clone());
         }
-        if let Ok(p) = std::env::var("TRUST_PATH") {
-            return Ok(PathBuf::from(p));
-        }
-        let home = std::env::var("HOME")
-            .map_err(|_| anyhow::anyhow!("HOME environment variable not set"))?;
+
+        let home = std::env::var("HOME").context("HOME environment variable not set")?;
         Ok(PathBuf::from(home).join("src").join("tries"))
     }
 }

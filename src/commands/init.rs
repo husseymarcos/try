@@ -1,18 +1,17 @@
+use crate::context::RunContext;
 use anyhow::Result;
 use std::path::PathBuf;
 
-fn exe() -> String {
+fn current_exe_path() -> String {
     std::env::current_exe()
         .map(|p| p.to_string_lossy().into_owned())
-        .unwrap_or_else(|_| "try".to_string())
+        .unwrap_or_else(|_| "trust".to_string())
 }
 
-pub fn init(path: Option<PathBuf>) -> Result<()> {
-    let root = path
-        .or_else(|| std::env::var("TRUST_PATH").ok().map(PathBuf::from))
-        .or_else(|| std::env::current_dir().ok())
-        .ok_or_else(|| anyhow::anyhow!("PATH required (argument, TRUST_PATH, or current directory)"))?;
+pub fn init(ctx: &RunContext, path: Option<PathBuf>) -> Result<()> {
+    let root = path.unwrap_or_else(|| ctx.root.clone());
     let root_str = root.to_string_lossy();
+    
     let shell = std::env::var("SHELL")
         .ok()
         .and_then(|s| {
@@ -21,39 +20,39 @@ pub fn init(path: Option<PathBuf>) -> Result<()> {
                 .map(|n| n.to_string_lossy().into_owned())
         })
         .unwrap_or_else(|| "bash".to_string());
+        
     let function = match shell.as_str() {
         "fish" => fish_function(&root_str),
-        _ => sh_function(&root_str),
+        _ => bash_function(&root_str),
     };
+    
     println!("{function}");
     Ok(())
 }
 
-fn sh_function(root: &str) -> String {
+fn bash_function(root: &str) -> String {
+    let exe = current_exe_path();
     format!(
         r#"try() {{
     local output
-    export TRUST_PATH="{}"
-    output=$("{}" "$@")
+    export TRUST_PATH="{root}"
+    output=$("{exe}" "$@")
     if [ -n "$output" ]; then
         eval "$output"
     fi
-}}"#,
-        root,
-        exe()
+}}"#
     )
 }
 
 fn fish_function(root: &str) -> String {
+    let exe = current_exe_path();
     format!(
         r#"function try
-    set -x TRUST_PATH "{}"
-    set output ({} $argv)
+    set -x TRUST_PATH "{root}"
+    set output ({exe} $argv)
     if [ -n "$output" ]
         eval $output
     end
-end"#,
-        root,
-        exe()
+end"#
     )
 }
