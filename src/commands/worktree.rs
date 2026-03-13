@@ -1,29 +1,23 @@
+use crate::commands::{dated_name, git_run};
 use crate::context::RunContext;
-use anyhow::{Context as _, Result};
-use chrono::Local;
+use anyhow::Result;
 use std::path::Path;
-use std::process::Command;
 
 pub fn worktree_dir(ctx: &RunContext, name: Option<String>) -> Result<()> {
-    let base_name = name.ok_or_else(|| anyhow::anyhow!("Name required for worktree"))?;
-    let dir_name = format!("{}-{base_name}", Local::now().format("%Y-%m-%d"));
+    let name = name.ok_or_else(|| anyhow::anyhow!("Name required for worktree"))?;
+    let dir_name = dated_name(&name);
     let target_path = ctx.prepare_target_path(&dir_name)?;
 
     if !is_git_repo(&std::env::current_dir()?)? {
         anyhow::bail!("Not in a git repository");
     }
 
-    let status = Command::new("git")
-        .arg("worktree")
-        .arg("add")
-        .arg(&target_path)
-        .status()
-        .with_context(|| "Failed to create git worktree")?;
-    if !status.success() {
-        anyhow::bail!("git worktree add failed");
-    }
-    ctx.print_cd(&target_path);
-    Ok(())
+    git_run(
+        ctx,
+        &["worktree", "add", &target_path.to_string_lossy()],
+        &target_path,
+        "git worktree add",
+    )
 }
 
 pub(crate) fn is_git_repo(path: &Path) -> Result<bool> {
