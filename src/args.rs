@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 #[command(
-    name = "trust", 
+    name = "try", 
     version,
     about = "Ephemeral workspace manager for your experiments",
     long_about = "Quickly create and jump into fresh folders for your experiments – an ephemeral workspace manager."
@@ -18,7 +18,7 @@ pub struct Args {
     #[arg(
         long,
         value_name = "PATH",
-        env = "TRUST_PATH",
+        env = "TRY_PATH",
         help = "Override tries directory (default: ~/src/tries)"
     )]
     pub path: Option<PathBuf>,

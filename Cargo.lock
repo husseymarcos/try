@@ -692,7 +692,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "trust"
+name = "try"
 version = "0.1.0"
 dependencies = [
  "anyhow",

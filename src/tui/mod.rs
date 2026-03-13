@@ -180,7 +180,7 @@ fn ui(f: &mut Frame, app: &mut App) {
 fn render_header(f: &mut Frame, area: Rect, query: &str) {
     let block = Block::default()
         .borders(Borders::ALL)
-        .title(" Trust Selector ")
+        .title(" Try Selector ")
         .border_style(Style::default().fg(Color::Cyan));
     
     let content = Line::from(vec![

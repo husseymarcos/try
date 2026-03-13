@@ -24,4 +24,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo build --release
-      - run: ./spec/tests/runner.sh "$(pwd)/target/release/trust"
+      - run: ./spec/tests/runner.sh "$(pwd)/target/release/try"

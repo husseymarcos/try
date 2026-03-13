@@ -1,8 +1,8 @@
-## Trust
+## Try
 
-Trust is a small command‑line tool that reimagines the original [`try`](https://github.com/tobi/try) project in Rust.
+Try is a small command‑line tool that reimagines the original [`try`](https://github.com/tobi/try) project in Rust.
 
-Where `try` helps you quickly create and jump into fresh folders for your experiments, Trust aims to offer the same playful, low‑friction workflow, but built with Rust instead of Ruby.
+Where `try` helps you quickly create and jump into fresh folders for your experiments, Try aims to offer the same playful, low‑friction workflow, but built with Rust instead of Ruby.
 
 ### What this project is about
 
@@ -12,16 +12,16 @@ Where `try` helps you quickly create and jump into fresh folders for your experi
 
 ### Running the spec tests
 
-The repository ships with a spec test suite under `spec/tests` that can be run against any `trust` binary.
+The repository ships with a spec test suite under `spec/tests` that can be run against any `try` binary.
 
 1. **Build the binary** (from the project root):
 
 ```bash
-cargo build --bin trust
+cargo build --bin try
 ```
 
 2. **Run the spec runner** against the built binary:
 
 ```bash
-./spec/tests/runner.sh ./target/debug/trust
+./spec/tests/runner.sh ./target/debug/try
 ```

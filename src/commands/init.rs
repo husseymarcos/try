@@ -17,7 +17,7 @@ pub fn init(ctx: &RunContext, path: Option<PathBuf>) -> Result<()> {
     let template = match shell_name.as_ref() {
         "fish" => format!(
             r#"function try
-    set -x TRUST_PATH "{root_str}"
+    set -x TRY_PATH "{root_str}"
     set output ({exe} $argv)
     if [ -n "$output" ]
         eval $output
@@ -27,7 +27,7 @@ end"#
         _ => format!(
             r#"try() {{
     local output
-    export TRUST_PATH="{root_str}"
+    export TRY_PATH="{root_str}"
     output=$("{exe}" "$@")
     if [ -n "$output" ]; then
         eval "$output"
